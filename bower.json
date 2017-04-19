@@ -1,0 +1,17 @@
+{
+  "name": "skiploop-cropper",
+  "homepage": "https://github.com/edisonskiploop/cropper",
+  "authors": [
+    "Edison <edison@skiploop.com>"
+  ],
+  "description": "",
+  "main": "angular-image-cropper.js",
+  "license": "MIT",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ]
+}

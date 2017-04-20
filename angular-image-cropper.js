@@ -637,6 +637,32 @@ return /******/ (function(modules) { // webpackBootstrap
 	  context = canvas.getContext('2d');
 	  context.translate(-cx,-cy); //move to centre of canvas
 
+	  context.rotate(this.data.degrees * Math.PI/180);
+	  context.scale(this.data.scale, this.data.scale);
+
+	  if(this.data.degrees == 0) { // simple offsets from canvas centre & scale
+	    context.drawImage(this.elements.image,
+	      (cx - this.data.x) / this.data.scale,
+	      (cy - this.data.y) / this.data.scale
+	    );
+	  } else if(this.data.degrees == 90) { // swap axis and reverse the new y origin
+	    context.drawImage(this.elements.image,
+	      (cy - this.data.y) / this.data.scale,
+	      (-1 * this.elements.image.naturalHeight) + ((-cx + this.data.x) / this.data.scale)
+	    );
+	  } else if(this.data.degrees == 180) { // reverse both origins
+	    context.drawImage(this.elements.image,
+	      (-1 * this.elements.image.naturalWidth) + ((-cx + this.data.x) / this.data.scale),
+	      (-1 * this.elements.image.naturalHeight) + ((-cy + this.data.y) / this.data.scale)
+	    );
+	  } else if(this.data.degrees == 270) { // swap axis and reverse the new x origin
+	    context.drawImage(this.elements.image,
+	      (-1 * this.elements.image.naturalWidth) + ((-cy + this.data.y) / this.data.scale),
+	      (cx - this.data.x) / this.data.scale
+	    );
+	  }
+	  
+	  
     var bin = atob(this.elements.image.currentSrc.split(',')[1]);
     var base64 = bin.replace(/^data\:([^\;]+)\;base64,/gmi, '');
     // var binaryString = atob(base64);
@@ -662,30 +688,6 @@ return /******/ (function(modules) { // webpackBootstrap
         break;
     }
 
-	  context.rotate(this.data.degrees * Math.PI/180);
-	  context.scale(this.data.scale, this.data.scale);
-
-	  if(this.data.degrees == 0) { // simple offsets from canvas centre & scale
-	    context.drawImage(this.elements.image,
-	      (cx - this.data.x) / this.data.scale,
-	      (cy - this.data.y) / this.data.scale
-	    );
-	  } else if(this.data.degrees == 90) { // swap axis and reverse the new y origin
-	    context.drawImage(this.elements.image,
-	      (cy - this.data.y) / this.data.scale,
-	      (-1 * this.elements.image.naturalHeight) + ((-cx + this.data.x) / this.data.scale)
-	    );
-	  } else if(this.data.degrees == 180) { // reverse both origins
-	    context.drawImage(this.elements.image,
-	      (-1 * this.elements.image.naturalWidth) + ((-cx + this.data.x) / this.data.scale),
-	      (-1 * this.elements.image.naturalHeight) + ((-cy + this.data.y) / this.data.scale)
-	    );
-	  } else if(this.data.degrees == 270) { // swap axis and reverse the new x origin
-	    context.drawImage(this.elements.image,
-	      (-1 * this.elements.image.naturalWidth) + ((-cy + this.data.y) / this.data.scale),
-	      (cx - this.data.x) / this.data.scale
-	    );
-	  }
 
 	  var base64 = canvas.toDataURL('image/jpeg');
 	  this.events.triggerHandler('Cropped', base64);

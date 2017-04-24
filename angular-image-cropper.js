@@ -235,8 +235,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	Cropper.prototype.buildDOM = function() {
 	  var _elements;
 	  _elements = this.elements;
-	  //if image zoomed
-	  _elements.zoomedImage = false;
 
 	  // Wrapper.
 	  _elements.wrapper = document.createElement('div');
@@ -591,8 +589,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  if (factor <= 0 || factor == 1) {
 	    return;
 	  }
-	  this.elements.zoomedImage = true;
-		
+
 	  var originalWidth = this.width;
 
 	  if (this.width * factor > 1 && this.height * factor > 1) {
@@ -602,7 +599,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	    this.elements.container.style.width = (this.width * 100).toFixed(2) + '%';
 	    this.data.scale *= factor;
 	  } else {
-		this.elements.zoomedImage = false;
 	    this.fitImage();
 	    factor = this.width / originalWidth;
 	  }
@@ -642,7 +638,33 @@ return /******/ (function(modules) { // webpackBootstrap
 	  context.translate(-cx,-cy); //move to centre of canvas
 
 	  context.rotate(this.data.degrees * Math.PI/180);
-	  context.scale(this.data.scale, this.data.scale);
+
+    var bin = atob(this.elements.image.currentSrc.split(',')[1]);
+    var base64 = bin.replace(/^data\:([^\;]+)\;base64,/gmi, '');
+    // var binaryString = atob(base64);
+    var len = bin.length;
+    var bytes = new Uint8Array(len);
+    for (var i = 0; i < len; i++) {
+      bytes[i] = bin.charCodeAt(i);
+    }
+    var buffer = bytes.buffer;
+    var exif = EXIF.readFromBinaryFile(buffer);
+    switch (exif.Orientation)
+    {
+      case 3:
+        // Need to rotate 180 deg
+        break;
+
+      case 6:
+        context.rotate(90 * Math.PI/180);
+        break;
+
+      case 8:
+        // Need to rotate 90 deg counter clockwise
+        break;
+    }
+
+    context.scale(this.data.scale, this.data.scale);
 
 	  if(this.data.degrees == 0) { // simple offsets from canvas centre & scale
 	    context.drawImage(this.elements.image,
@@ -665,33 +687,29 @@ return /******/ (function(modules) { // webpackBootstrap
 	      (cx - this.data.x) / this.data.scale
 	    );
 	  }
-	  
-	  
-    var bin = atob(this.elements.image.currentSrc.split(',')[1]);
-    var base64 = bin.replace(/^data\:([^\;]+)\;base64,/gmi, '');
-    // var binaryString = atob(base64);
-    var len = bin.length;
-    var bytes = new Uint8Array(len);
-    for (var i = 0; i < len; i++) {
-      bytes[i] = bin.charCodeAt(i);
-    }
-    var buffer = bytes.buffer;
-    var exif = EXIF.readFromBinaryFile(buffer);
-    switch (exif.Orientation)
-    {
-      case 3:
-        // Need to rotate 180 deg
-        break;
 
-      case 6:
-		if(!this.elements.zoomedImage)
-			context.rotate(90 * Math.PI/180);
-        break;
+    // if(this.data.degrees == 0) { // simple offsets from canvas centre & scale
+    //   context.scale(this.elements.image,
+    //     (cx - this.data.x) / this.data.scale,
+    //     (cy - this.data.y) / this.data.scale
+    //   );
+    // } else if(this.data.degrees == 90) { // swap axis and reverse the new y origin
+    //   context.drawImage(this.elements.image,
+    //     (cy - this.data.y) / this.data.scale,
+    //     (-1 * this.elements.image.naturalHeight) + ((-cx + this.data.x) / this.data.scale)
+    //   );
+    // } else if(this.data.degrees == 180) { // reverse both origins
+    //   context.drawImage(this.elements.image,
+    //     (-1 * this.elements.image.naturalWidth) + ((-cx + this.data.x) / this.data.scale),
+    //     (-1 * this.elements.image.naturalHeight) + ((-cy + this.data.y) / this.data.scale)
+    //   );
+    // } else if(this.data.degrees == 270) { // swap axis and reverse the new x origin
+    //   context.drawImage(this.elements.image,
+    //     (-1 * this.elements.image.naturalWidth) + ((-cy + this.data.y) / this.data.scale),
+    //     (cx - this.data.x) / this.data.scale
+    //   );
+    // }
 
-      case 8:
-        // Need to rotate 90 deg counter clockwise
-        break;
-    }
 
 	  var base64 = canvas.toDataURL('image/jpeg');
 	  this.events.triggerHandler('Cropped', base64);

@@ -235,6 +235,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	Cropper.prototype.buildDOM = function() {
 	  var _elements;
 	  _elements = this.elements;
+	  //if image zoomed
+	  _elements.zoomedImage = false;
 
 	  // Wrapper.
 	  _elements.wrapper = document.createElement('div');
@@ -589,7 +591,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	  if (factor <= 0 || factor == 1) {
 	    return;
 	  }
-
+	  this.elements.zoomedImage = true;
+		
 	  var originalWidth = this.width;
 
 	  if (this.width * factor > 1 && this.height * factor > 1) {
@@ -599,6 +602,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    this.elements.container.style.width = (this.width * 100).toFixed(2) + '%';
 	    this.data.scale *= factor;
 	  } else {
+		this.elements.zoomedImage = false;
 	    this.fitImage();
 	    factor = this.width / originalWidth;
 	  }
@@ -680,14 +684,14 @@ return /******/ (function(modules) { // webpackBootstrap
         break;
 
       case 6:
-        context.rotate(90 * Math.PI/180);
+		if(!this.elements.zoomedImage)
+			context.rotate(90 * Math.PI/180);
         break;
 
       case 8:
         // Need to rotate 90 deg counter clockwise
         break;
     }
-
 
 	  var base64 = canvas.toDataURL('image/jpeg');
 	  this.events.triggerHandler('Cropped', base64);
